@@ -1,0 +1,37 @@
+- name: Ensure a system user for the web service exists
+  ansible.builtin.user:
+    name: roboshop
+    comment: "roboshop system user"
+    system: yes
+    shell: /sbin/nologin
+    state: present
+    home: /app
+
+- name: delete the /app folder if already exists
+  ansible.builtin.file:
+    path: /app
+    state: absent
+
+- name: Create a /app directory if it does not exist
+  ansible.builtin.file:
+    path: /app
+    state: directory
+
+
+- name: delete the "{{ component }}"  zip file if alredy exits
+  ansible.builtin.file:
+    path: "/tmp/{{ component }}.zip"
+    state: absent  
+    
+
+- name: Download "{{ component }}" zip file binary
+  ansible.builtin.get_url:
+    url: "https://roboshop-artifacts.s3.amazonaws.com/{{ component }}-v3.zip"
+    dest: "/tmp/{{ component}}.zip"
+    
+
+- name: unzip the /tmp/"{{ component }}".zip file
+  ansible.builtin.unarchive:
+    src: "/tmp/{{ component }}.zip"
+    dest: /app
+    remote_src: yes
